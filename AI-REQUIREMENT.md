@@ -51,6 +51,6 @@
 4. 執行 `uv run python scripts/run_checks.py`，所有檢查與測試需通過。
 5. 建立清楚的提交（例如 `chore: release X.Y.Z`）。
 6. 建立 `vX.Y.Z` 標籤，並透過 `scripts/update_latest_tag.py` 驗證後才可更新 `latest`。
-7. 推送程式碼與標籤；若尚未自動化 `latest`，請依 TODO 建立流程。
+7. 推送程式碼與標籤；GitHub Actions 會在 `v*` 標籤推送後自動執行腳本並更新 `latest`，仍可在本地先跑 `--dry-run` 以確保無誤。
 
 遵照以上規定能協助所有新專案維持一致結構、風格與可靠度。若規格更新，請同步調整本文件。

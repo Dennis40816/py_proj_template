@@ -108,28 +108,17 @@
 
 ### Manage Tags
 
-發佈前可使用 `scripts/update_latest_tag.py` 驗證所有檢查項目並更新 `latest` 標籤：
-
-- 顯示預期操作（不動標籤）
+- 在建立 `vX.Y.Z` 標籤前，可先執行以下指令確保檢查通過：
   ```bash
   python scripts/update_latest_tag.py --dry-run
   ```
-- 實際更新 `latest`
-  ```bash
-  python scripts/update_latest_tag.py
-  ```
-
-若希望在推送前自動檢查，可建立 `.git/hooks/pre-push`：
-
-```bash
-cat <<'HOOK' > .git/hooks/pre-push
-#!/usr/bin/env bash
-python scripts/update_latest_tag.py --dry-run || exit 1
-HOOK
-chmod +x .git/hooks/pre-push
-```
-
-Git 沒有針對 `git tag` 的專屬 hook，使用 `pre-push` 能在送出標籤時進行驗證。
+  若要在本地同步更新 `latest`，可移除 `--dry-run`。
+- 推送含有 `v*` 標籤時，GitHub Actions 會自動觸發 `.github/workflows/update-latest-tag.yml`，它會：
+  1. 執行 `python scripts/update_latest_tag.py` 驗證版本資訊與變更紀錄。
+  2. 將 `latest` 標籤強制推送到對應的 commit。
+  3. 流程會略過 `latest` 標籤本身，避免自我觸發的循環推送。
+  
+此流程確保所有專案都能一致地維護最新標籤。
 
 ## NOTICE
 
