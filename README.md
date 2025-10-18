@@ -112,11 +112,11 @@
   ```bash
   python scripts/update_latest_tag.py --dry-run
   ```
-  若要在本地同步更新 `latest`，可移除 `--dry-run`。
+  若要在本地同步驗證並更新 `latest`，可移除 `--dry-run`，但推送時僅需送出 `v*` 標籤即可。
 - 推送含有 `v*` 標籤時，GitHub Actions 會自動觸發 `.github/workflows/update-latest-tag.yml`，它會：
   1. 執行 `python scripts/update_latest_tag.py` 驗證版本資訊與變更紀錄。
   2. 將 `latest` 標籤強制推送到對應的 commit。
-  3. 流程會略過 `latest` 標籤本身，避免自我觸發的循環推送。
+  3. 流程會略過 `latest` 標籤本身，避免自我觸發的循環推送；因此請勿手動推送 `latest`。
   
 此流程確保所有專案都能一致地維護最新標籤。
 

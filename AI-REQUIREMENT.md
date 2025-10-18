@@ -51,6 +51,6 @@
 4. 執行 `uv run python scripts/run_checks.py`，所有檢查與測試需通過。
 5. 建立清楚的提交（例如 `chore: release X.Y.Z`）。
 6. 建立 `vX.Y.Z` 標籤後，執行 `scripts/update_latest_tag.py` 驗證：在模板專案 (`py-proj-template`) 會同時檢查 `config/settings.toml`，其他專案則僅檢查 `pyproject.toml` 版本。
-7. 推送程式碼與標籤；GitHub Actions 會在 `v*` 標籤推送後自動執行腳本並更新 `latest`（忽略 `latest` 標籤本身），仍建議在本地先跑 `--dry-run` 以確保無誤。
+7. 推送程式碼與 `v*` 標籤；GitHub Actions 會在推送後自動執行腳本並更新 `latest`（忽略 `latest` 標籤本身），因此不要手動推送 `latest`；仍建議在本地先跑 `--dry-run` 以確保無誤。
 
 遵照以上規定能協助所有新專案維持一致結構、風格與可靠度。若規格更新，請同步調整本文件。
