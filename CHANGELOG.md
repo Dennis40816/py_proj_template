@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.3] - Unreleased
+## [1.0.3] - 2025-10-19
 
 - 新增 GitHub Actions 工作流程 `update-latest-tag.yml`，在推送版本標籤後自動驗證與更新 `latest`。
 - README 說明自動化標籤管理流程，仍保留腳本供本地檢查使用。
