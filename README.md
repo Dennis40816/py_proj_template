@@ -35,10 +35,21 @@
 
 ## Quick Start
 
-1. **替換專案名稱**
+1. **建立專案並替換名稱**
+   ```bash
+   git clone git@github.com:Dennis40816/py_proj_template.git my_project
+   cd my_project
+   git remote rename origin upstream              # 保留模板遠端以同步更新
+   git remote add origin <your_repo_ssh_url>      # 指向自己的 repository
+   git fetch upstream
+   git checkout -b template upstream/main         # 專用模板分支（追蹤 upstream）
+   git checkout main
+   ```
+
    - 將 `src/proj_name/` 目錄與其中檔案改名為你的專案套件名稱（例如 `my_project`）。
-   - 更新 `pyproject.toml` 中的 `project.name`、`requires-python` 等資訊，並搜尋程式碼將 `proj_name` 替換成新的套件名稱。
-   - 同步修改 `scripts/run_checks.py` 或其他腳本中的名稱（若有）。
+   - 更新 `pyproject.toml` 的 `project.name` 等設定，並搜尋替換程式碼裡的 `proj_name`。
+   - 視需要同步調整 `scripts/run_checks.py` 或其他腳本。
+   - 後續同步模板：在 `template` 分支上執行 `git pull upstream main`，再切回 `main` 以 `git merge template` 帶入更新。
 
 2. **啟動環境並執行 CLI 範例**
    - 建議使用 `uv` 建立虛擬環境並以 editable 模式安裝：
@@ -68,7 +79,9 @@
    - 若新增新的測試邏輯，也請同步更新 `tests/conftest.py` 的 fixture。
 
 5. **調整 AI-REQUIREMENT.md**
-   - 專案開發前，應觀察目前的 `ai_requirement.md` 是否符合需要，如果不符合去 py_proj_template 修改後 pull 回來
+   - 專案開發前，檢視 `AI-REQUIREMENT.md` 是否符合需求；若需要調整請在模板更新後同步帶回。
+6. **記錄模板版號**
+   - `config/settings.toml` 中的 `template.version` 標記目前使用的模板標籤，當你從模板合併新變更時務必更新此欄位。
 
 ## Usage
 

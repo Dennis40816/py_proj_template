@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1] - 2025-10-19
+
+- README Quick Start 說明如何同步保留 `upstream`（模板）與 `origin`（專案），建立 `template` 分支並合併更新。
+- 新增 `config/settings.toml` 的 `template.version` 欄位，用於紀錄目前採用的模板標籤。
+- 新增 `TODO.md`，提醒建立自動更新 `latest` 標籤的流程。
+- 新增 `scripts/update_latest_tag.py`，用於驗證發佈前檢查並安全更新 `latest` 標籤。
+
 ## [1.0.0] - 2025-10-19
 
 - 建立完整的 `src/` 骨架，涵蓋 `api`、`application`、`core/lib_example`、`cli`、`services`、`domain`、`infra`、`utils` 等常用層級。

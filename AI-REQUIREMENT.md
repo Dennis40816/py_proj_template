@@ -41,4 +41,16 @@
   - 隨著功能成熟需補齊單元與整合測試；模板已預留骨架，請填入實際場景。
   - 專案需可透過 `pyproject.toml` 直接安裝與建置（支援 `uv build` / `uv publish`）。
 
-遵照以上規定能協助所有新專案維持一致結構、風格與可靠度。若規格更新，請同步調整本文件。***
+## Release Checklist
+
+在發佈新版本前，務必完成下列步驟，否則不得更新標籤：
+
+1. 確保工作目錄乾淨（無未提交變更）。
+2. 更新版本資訊：`pyproject.toml` 與 `config/settings.toml` 的版本必須一致。
+3. 撰寫 `CHANGELOG.md` 對應版本的條目，並視需要更新 `README.md`。
+4. 執行 `uv run python scripts/run_checks.py`，所有檢查與測試需通過。
+5. 建立清楚的提交（例如 `chore: release X.Y.Z`）。
+6. 建立 `vX.Y.Z` 標籤，並透過 `scripts/update_latest_tag.py` 驗證後才可更新 `latest`。
+7. 推送程式碼與標籤；若尚未自動化 `latest`，請依 TODO 建立流程。
+
+遵照以上規定能協助所有新專案維持一致結構、風格與可靠度。若規格更新，請同步調整本文件。
