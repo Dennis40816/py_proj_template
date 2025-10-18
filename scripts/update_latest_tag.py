@@ -76,13 +76,16 @@ def read_pyproject_fields() -> tuple[str, str]:
     return name_match.group(1), version_match.group(1)
 
 
-def read_template_version() -> str:
-    """Return the recorded template version from settings."""
+def read_template_version() -> str | None:
+    """Return template version from settings if available."""
 
-    text = (ROOT / "config" / "settings.toml").read_text(encoding="utf-8")
+    settings_path = ROOT / "config" / "settings.toml"
+    if not settings_path.exists():
+        return None
+    text = settings_path.read_text(encoding="utf-8")
     match = re.search(r'^version\s*=\s*"([^"]+)"', text, flags=re.MULTILINE)
     if not match:
-        raise SystemExit("config/settings.toml must define template.version.")
+        return None
     return match.group(1)
 
 
@@ -154,18 +157,25 @@ def main(argv: list[str] | None = None) -> int:
     ensure_clean_workspace()
 
     project_name, project_version = read_pyproject_fields()
-    if project_name != TEMPLATE_PACKAGE_NAME:
-        raise SystemExit(
-            f"This automation is intended for the template repository "
-            f"({TEMPLATE_PACKAGE_NAME}). Detected project name: {project_name}."
-        )
 
-    config_version = read_template_version()
-    if project_version != config_version:
-        raise SystemExit(
-            "Version mismatch between pyproject.toml and config/settings.toml. "
-            "Update both files before tagging."
-        )
+    template_version = read_template_version()
+    if project_name == TEMPLATE_PACKAGE_NAME:
+        if template_version is None:
+            raise SystemExit(
+                "Template repositories must define config/settings.toml with template.version."
+            )
+        if project_version != template_version:
+            raise SystemExit(
+                "Version mismatch between pyproject.toml and config/settings.toml. "
+                "Update both files before tagging."
+            )
+    else:
+        # For downstream projects, optionally warn if metadata drifts.
+        if template_version and template_version != project_version:
+            print(
+                "Warning: config/settings.toml template.version differs from pyproject version."
+                " Proceeding because this is not the template repo."
+            )
 
     if not changelog_has_entry(project_version):
         raise SystemExit(

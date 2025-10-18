@@ -106,6 +106,31 @@
 
 腳本會自動偵測 `uv` 是否存在，若有則改用 `uv run` 以確保在一致的環境中執行；否則退回到 `python -m <tool>` 的方式。
 
+### Manage Tags
+
+發佈前可使用 `scripts/update_latest_tag.py` 驗證所有檢查項目並更新 `latest` 標籤：
+
+- 顯示預期操作（不動標籤）
+  ```bash
+  python scripts/update_latest_tag.py --dry-run
+  ```
+- 實際更新 `latest`
+  ```bash
+  python scripts/update_latest_tag.py
+  ```
+
+若希望在推送前自動檢查，可建立 `.git/hooks/pre-push`：
+
+```bash
+cat <<'HOOK' > .git/hooks/pre-push
+#!/usr/bin/env bash
+python scripts/update_latest_tag.py --dry-run || exit 1
+HOOK
+chmod +x .git/hooks/pre-push
+```
+
+Git 沒有針對 `git tag` 的專屬 hook，使用 `pre-push` 能在送出標籤時進行驗證。
+
 ## NOTICE
 
 - 以此模板為基底建立的新專案，請保留一個專用的 `template` 分支。當模板更新時，先在該分支上 `git pull` 最新變更，再透過合併 (`merge`) 將更新帶回主線，避免 rebase 造成不必要的衝突。

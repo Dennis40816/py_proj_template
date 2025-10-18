@@ -1,5 +1,12 @@
 # Changelog
 
+# Changelog
+
+## [1.0.2] - 2025-10-19
+
+- 擴充 `scripts/update_latest_tag.py`，讓所有專案都能使用；模板專案仍會額外檢查 `config/settings.toml`。
+- README 新增管理標籤與 Git hook 說明，方便在推送前自動驗證。
+
 ## [1.0.1] - 2025-10-19
 
 - README Quick Start 說明如何同步保留 `upstream`（模板）與 `origin`（專案），建立 `template` 分支並合併更新。
