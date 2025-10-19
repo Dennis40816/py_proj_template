@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.4] - Unreleased
+## [1.0.4] - 2025-10-20
 
 - 改善 `scripts/release_check.py` 的錯誤訊息，標示實際檔案路徑與欄位，方便定位問題。
 - 新增 `scripts/release_check.py` 作為統一釋出檢查，供 pre-push hook 與 CI 維護 `latest` 標籤。
@@ -35,4 +35,5 @@
 - 擴充 `tests/`，包含單元與整合測試示例以及常用 fixture（`conftest.py`）。
 - 撰寫 `README.md` 的 Intro、Quick Start、Usage、Notice、Note 等章節，指引用法、同步流程與測試清理事項。
 - 新增 `ai_requirements.md` 給 AI 開發助手，彙整自訂規則與核心開發準則。
+
 
