@@ -34,22 +34,17 @@
 ```
 
 ## Quick Start
-
-1. **建立專案並替換名稱**
+1. **取得模板並執行初始化腳本**
    ```bash
    git clone git@github.com:Dennis40816/py_proj_template.git my_project
    cd my_project
-   git remote rename origin upstream              # 保留模板遠端以同步更新
-   git remote add origin <your_repo_ssh_url>      # 指向自己的 repository
-   git fetch upstream
-   git checkout -b template upstream/main         # 專用模板分支（追蹤 upstream）
-   git checkout main
+   python scripts/repo_init.py --new-name my_project --origin <your_repo_ssh_url> --apply
    ```
 
-   - 將 `src/proj_name/` 目錄與其中檔案改名為你的專案套件名稱（例如 `my_project`）。
-   - 更新 `pyproject.toml` 的 `project.name` 等設定，並搜尋替換程式碼裡的 `proj_name`。
-   - 視需要同步調整 `scripts/run_checks.py` 或其他腳本。
-   - 後續同步模板：在 `template` 分支上執行 `git pull upstream main`，再切回 `main` 以 `git merge template` 帶入更新。
+   - `repo_init.py` 會自動改名 `src/proj_name/`、全域替換識別字，並將 `project.name` 與版本初始化為 `1.0.0`。
+   - 腳本也會將遠端 `origin` 重新命名為 `upstream`，並依 `--origin` 參數幫你加回新的 `origin`；若想先檢查輸出，可省略 `--apply` 做乾跑。
+   - 初始流程會建立 `template` 分支並安裝 pre-push hook；若不需要建立 `.venv`，可以加上 `--no-uv`。
+   - 後續同步模板時，仍在 `template` 分支 `git pull upstream main`，再切回 `main` 做合併。
 
 2. **啟動環境並執行 CLI 範例**
    - 建議使用 `uv` 建立虛擬環境並以 editable 模式安裝：
@@ -108,18 +103,17 @@
 
 ### Manage Tags
 
-- 在建立 `vX.Y.Z` 標籤前，可先執行以下指令確保檢查通過：
+- 在建立 `vX.Y.Z` 標籤前，可透過以下指令再次確認檢查項目：
   ```bash
-  python scripts/update_latest_tag.py --dry-run
+  python scripts/release_check.py --tag vX.Y.Z --require-highest
   ```
-  若要在本地同步驗證並更新 `latest`，可移除 `--dry-run`，但推送時僅需送出 `v*` 標籤即可。
-- 推送含有 `v*` 標籤時，GitHub Actions 會自動觸發 `.github/workflows/update-latest-tag.yml`，它會：
-  1. 執行 `python scripts/update_latest_tag.py` 驗證版本資訊與變更紀錄。
-  2. 將 `latest` 標籤強制推送到對應的 commit。
-  3. 流程會略過 `latest` 標籤本身，避免自我觸發的循環推送；因此請勿手動推送 `latest`。
-  
-此流程確保所有專案都能一致地維護最新標籤。
+  `--require-highest` 會同步抓取遠端 `v*` 標籤並確認當前標籤是最高版本。
+- 推送 `v*` 標籤後，GitHub Actions 會自動觸發 `.github/workflows/update-latest.yml`，流程會：
+  1. 執行 `python scripts/release_check.py --tag "$GITHUB_REF_NAME" --update-latest`，重新檢查並鎖定最新標籤。
+  2. 檢查通過後更新 `latest` 指向該次發布的 commit。
+  3. 忽略 `latest` 標籤本身，避免重複觸發，因此僅需推送版本標籤。
 
+此流程確保所有專案一致維護最新標籤。
 ## NOTICE
 
 - 以此模板為基底建立的新專案，請保留一個專用的 `template` 分支。當模板更新時，先在該分支上 `git pull` 最新變更，再透過合併 (`merge`) 將更新帶回主線，避免 rebase 造成不必要的衝突。

@@ -1,0 +1,18 @@
+name: update-latest
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release-check-and-move-latest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run unified release checklist and move 'latest'
+        run: python scripts/release_check.py --tag "$GITHUB_REF_NAME" --update-latest

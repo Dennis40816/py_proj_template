@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.4] - Unreleased
+
+- 新增 `scripts/release_check.py`，統一發佈檢查並支援 pre-push hook 與 CI 更新 `latest` 標籤。
+- 建立 `.github/workflows/update-latest.yml`，並更新文件改以 `release_check.py` 驗證與移動 `latest`。
+- 新增 `scripts/repo_init.py`，初始化專案時自動改名、重設版本為 `1.0.0` 並安裝 pre-push hook。
+
 ## [1.0.3] - 2025-10-19
 
 - 新增 GitHub Actions 工作流程 `update-latest-tag.yml`，在推送版本標籤後自動驗證與更新 `latest`。

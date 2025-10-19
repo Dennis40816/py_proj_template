@@ -9,3 +9,5 @@ from __future__ import annotations
 from proj_name.api import get_greeting
 
 __all__ = ["get_greeting"]
+
+__version__ = "1.0.3"
