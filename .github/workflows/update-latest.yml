@@ -4,6 +4,9 @@ on:
   push:
     tags: ['v*']
 
+permissions:
+  contents: write
+
 jobs:
   release-check-and-move-latest:
     runs-on: ubuntu-latest
@@ -16,3 +19,8 @@ jobs:
           python-version: '3.12'
       - name: Run unified release checklist and move 'latest'
         run: python scripts/release_check.py --tag "$GITHUB_REF_NAME" --update-latest
+      - name: Push latest tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git push origin latest --force
