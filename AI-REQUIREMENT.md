@@ -5,7 +5,7 @@
 ## 自訂開發規則
 
 - **評論與文件**：所有 code comment 與 docstring 一律使用英文撰寫，且每個公開的 function、class、module 都必須描述用途並附上簡單範例。
-- **匯入方式**：永遠使用絕對匯入（`from proj_name.module import symbol`），不得使用相對匯入。
+- **匯入方式**：永遠使用絕對匯入（`from py_proj_template.module import symbol`），不得使用相對匯入。
 - **語法風格**：善用 Python 的語法糖與現代特性（comprehension、context manager 等）在不影響可讀性下簡化程式。
 - **整潔哲學**：維持 Clean Code 與類 Unix 的簡潔風格，避免不必要的複雜度與冗長流程。
 - **資源管理**：任何需要釋放資源的操作（檔案、鎖、連線等）必須使用 `with` context manager 或等效機制確保自動清理。
@@ -20,7 +20,7 @@
   - 採 `src/` 佈局，核心邏輯放在專案同名套件內。
   - `tests/` 目錄必備，依需要劃分 unit、integration 等子資料夾。
   - `scripts/`、`docs/`、`data/` 等常用資料夾需遵循模板提供的層級。
-  - 公開 API 應由專屬模組（例如 `proj_name.api`）或套件 `__init__.py` 封裝，區隔內部實作與外部接口。
+  - 公開 API 應由專屬模組（例如 `py_proj_template.api`）或套件 `__init__.py` 封裝，區隔內部實作與外部接口。
 - **程式風格**
   - 遵循 PEP 8 命名慣例；函式與模組使用 snake_case，類別使用 CamelCase。
   - 以函式為優先，除非確有必要再建立類別。
@@ -54,3 +54,4 @@
 7. 推送程式碼與 `v*` 標籤；GitHub Actions 會透過 `.github/workflows/update-latest.yml` 自動加入 `--update-latest` 檢查，確認最高標籤後更新 `latest`。若要在本地確定最高標籤，可額外加上 `--require-highest`。
 
 遵照以上規定能協助所有新專案維持一致結構、風格與可靠度。若規格更新，請同步調整本文件。
+

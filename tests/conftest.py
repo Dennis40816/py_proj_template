@@ -1,4 +1,4 @@
-"""Shared fixtures for proj_name tests."""
+"""Shared fixtures for py_proj_template tests."""
 
 from __future__ import annotations
 
@@ -28,10 +28,10 @@ def project_root() -> Path:
 def cli_runner(
     project_root: Path,
 ) -> Callable[..., subprocess.CompletedProcess[str]]:
-    """Run the CLI via python -m proj_name and capture its output."""
+    """Run the CLI via python -m py_proj_template and capture its output."""
 
     def _run(*args: str) -> subprocess.CompletedProcess[str]:
-        command = [sys.executable, "-m", "proj_name", *args]
+        command = [sys.executable, "-m", "py_proj_template", *args]
         return subprocess.run(
             command,
             cwd=project_root,
@@ -41,3 +41,4 @@ def cli_runner(
         )
 
     return _run
+

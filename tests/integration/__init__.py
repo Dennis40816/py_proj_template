@@ -1,1 +1,2 @@
-"""Integration tests for proj_name."""
+"""Integration tests for py_proj_template."""
+

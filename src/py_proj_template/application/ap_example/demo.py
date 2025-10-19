@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from proj_name.api import get_greeting
+from py_proj_template.api import get_greeting
 
 
 def run_demo(name: str) -> None:
@@ -10,3 +10,4 @@ def run_demo(name: str) -> None:
 
     message = get_greeting(name)
     print(f"[application] {message}")
+

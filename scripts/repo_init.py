@@ -4,8 +4,8 @@
 Initialize a repo cloned from py_proj_template.
 
 Actions:
-  - Rename src/proj_name -> src/<new_name>
-  - Replace 'proj_name' in text files (skip protected files)
+  - Rename src/py_proj_template -> src/<new_name>
+  - Replace 'py_proj_template' in text files (skip protected files)
   - Update pyproject.toml: project.name and occurrences
   - Initialize versions to 1.0.0:
       * pyproject.toml [project].version = "1.0.0"
@@ -27,10 +27,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-PKG_OLD = SRC / "proj_name"
+PKG_OLD = SRC / "py_proj_template"
 PYPROJECT = ROOT / "pyproject.toml"
 TEXT_EXT = {".py", ".toml", ".md", ".yml", ".yaml", ".txt", ".cfg", ".ini", ".json", ".lock"}
 PROTECTED = {str((ROOT / "config" / "settings.toml").resolve())}
+DOC_TEMPLATES = {
+    "CHANGELOG.md": "# Changelog\n\n## [1.0.0] - Unreleased\n\n- TODO: list initial changes.\n",
+    "TODO.md": "# TODO\n\n- [ ] Add top-priority tasks for {project_title}.\n",
+}
 
 
 def sh(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
@@ -68,8 +72,8 @@ def rename_package(old_dir: Path, new_pkg: str, apply: bool) -> Path:
     return new_dir
 
 
-def replace_proj_name(root: Path, new_pkg: str, apply: bool) -> int:
-    pat = re.compile(r"\bproj_name\b")
+def replace_py_proj_template(root: Path, new_pkg: str, apply: bool) -> int:
+    pat = re.compile(r"\bpy_proj_template\b")
     n_changed = 0
     for p in iter_text_files(root):
         rp = str(p.resolve())
@@ -79,12 +83,30 @@ def replace_proj_name(root: Path, new_pkg: str, apply: bool) -> int:
             s = p.read_text(encoding="utf-8")
         except Exception:
             continue
-        ns = pat.sub(new_pkg, s)
+
+        changed_here = False
+        if p.name == "README.md":
+            # Avoid rewriting template clone URL hints; downstream users likely keep upstream path.
+            lines = s.splitlines(keepends=True)
+            new_lines = []
+            for line in lines:
+                if "git clone" in line and "py_proj_template" in line:
+                    new_lines.append(line)
+                    continue
+                new_line = pat.sub(new_pkg, line)
+                if new_line != line:
+                    changed_here = True
+                new_lines.append(new_line)
+            ns = "".join(new_lines)
+        else:
+            ns = pat.sub(new_pkg, s)
+            changed_here = ns != s
+
         if ns != s:
             n_changed += 1
             if apply:
                 p.write_text(ns, encoding="utf-8")
-            else:
+            elif changed_here:
                 print(f"dry-run: update {p}")
     return n_changed
 
@@ -92,7 +114,7 @@ def replace_proj_name(root: Path, new_pkg: str, apply: bool) -> int:
 def update_pyproject(pyproj: Path, new_name: str, apply: bool):
     s = pyproj.read_text(encoding="utf-8")
     s2 = re.sub(r'(?m)^(project\.name\s*=\s*")[^"]+(")', rf'\1{new_name}\2', s)
-    s2 = s2.replace("proj_name", new_name)
+    s2 = s2.replace("py_proj_template", new_name)
     if s2 != s:
         if apply:
             pyproj.write_text(s2, encoding="utf-8")
@@ -209,6 +231,19 @@ def validate_new_name(name: str):
         sys.exit("invalid package name. use [a-zA-Z_][a-zA-Z0-9_]*")
 
 
+def reset_doc_templates(new_pkg: str, apply: bool):
+    project_title = new_pkg.replace("_", " ").title()
+    for rel_path, template in DOC_TEMPLATES.items():
+        path = ROOT / rel_path
+        if not path.exists():
+            continue
+        content = template.format(project_title=project_title, package=new_pkg)
+        if apply:
+            path.write_text(content, encoding="utf-8")
+        else:
+            print(f"dry-run: reset {rel_path}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--new-name", required=True, help="new top-level package name, e.g., my_project")
@@ -227,11 +262,12 @@ def main():
     print(f"{mode}: init new package = {args.new_name}")
 
     rename_package(PKG_OLD, args.new_name, args.apply)
-    n_files = replace_proj_name(ROOT, args.new_name, args.apply)
+    n_files = replace_py_proj_template(ROOT, args.new_name, args.apply)
     print(f"files updated for identifier rename: {n_files}")
     update_pyproject(PYPROJECT, args.new_name, args.apply)
-    # 設定版本為 1.0.0（pyproject 與 __init__.py）
+    # set version to 1.0.0
     set_versions(args.new_name, args.apply)
+    reset_doc_templates(args.new_name, args.apply)
     set_git_remotes(args.origin, args.apply)
     ensure_template_branch(args.apply)
     create_env_and_install(args.apply, args.no_uv)

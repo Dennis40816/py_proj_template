@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
-from proj_name.cli.main import main
+from py_proj_template.cli.main import main
 
 __all__ = ["main"]
+

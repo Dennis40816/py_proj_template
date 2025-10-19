@@ -1,1 +1,2 @@
-"""Unit tests for proj_name."""
+"""Unit tests for py_proj_template."""
+

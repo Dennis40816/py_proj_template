@@ -2,9 +2,10 @@
 
 ## [1.0.4] - Unreleased
 
-- 新增 `scripts/release_check.py`，統一發佈檢查並支援 pre-push hook 與 CI 更新 `latest` 標籤。
-- 建立 `.github/workflows/update-latest.yml`，並更新文件改以 `release_check.py` 驗證與移動 `latest`。
-- 新增 `scripts/repo_init.py`，初始化專案時自動改名、重設版本為 `1.0.0` 並安裝 pre-push hook。
+- Added `scripts/release_check.py` to unify release checks for pre-push and CI workflows managing the `latest` tag.
+- Replaced `.github/workflows/update-latest.yml` to call `release_check.py --update-latest` when new `v*` tags are pushed.
+- Renamed the template package to `py_proj_template` and updated tests, docs, and CLI imports accordingly.
+- Enhanced `scripts/repo_init.py` to keep README clone examples, and reset `CHANGELOG.md`/`TODO.md` to minimal templates during initialization.
 
 ## [1.0.3] - 2025-10-19
 
@@ -28,8 +29,9 @@
 ## [1.0.0] - 2025-10-19
 
 - 建立完整的 `src/` 骨架，涵蓋 `api`、`application`、`core/lib_example`、`cli`、`services`、`domain`、`infra`、`utils` 等常用層級。
-- 提供最小示範流程：`lib_example` → `api` → `application` → CLI，並藉由 `python -m proj_name` 展現整體匯入關係。
+- 提供最小示範流程：`lib_example` → `api` → `application` → CLI，並藉由 `python -m py_proj_template` 展現整體匯入關係。
 - 新增 `scripts/run_checks.py` 以整合格式化、靜態檢查與測試指令。
 - 擴充 `tests/`，包含單元與整合測試示例以及常用 fixture（`conftest.py`）。
 - 撰寫 `README.md` 的 Intro、Quick Start、Usage、Notice、Note 等章節，指引用法、同步流程與測試清理事項。
 - 新增 `ai_requirements.md` 給 AI 開發助手，彙整自訂規則與核心開發準則。
+

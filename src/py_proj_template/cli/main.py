@@ -5,8 +5,8 @@ from __future__ import annotations
 import argparse
 from typing import Sequence
 
-from proj_name.application import run_demo
-from proj_name.core.lib_example import build_greeting
+from py_proj_template.application import run_demo
+from py_proj_template.core.lib_example import build_greeting
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -37,3 +37,4 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

@@ -18,9 +18,9 @@
 ├── scripts/                  # 補助腳本（如 run_checks.py）
 ├── spec/                     # 需求或規格文件來源
 ├── src/
-│   └── proj_name/
+│   └── py_proj_template/
 │       ├── __init__.py       # 專案對外公開 API（轉出 get_greeting 範例）
-│       ├── __main__.py       # `python -m proj_name` 入口
+│       ├── __main__.py       # `python -m py_proj_template` 入口
 │       ├── api/              # 對外公開的 API 層（示範 get_greeting）
 │       ├── application/      # 應用層範例（demo 工作流程）
 │       ├── cli/              # CLI 參考實作，串接核心與應用層
@@ -41,7 +41,7 @@
    python scripts/repo_init.py --new-name my_project --origin <your_repo_ssh_url> --apply
    ```
 
-   - `repo_init.py` 會自動改名 `src/proj_name/`、全域替換識別字，並將 `project.name` 與版本初始化為 `1.0.0`。
+   - `repo_init.py` 會自動改名 `src/py_proj_template/`、全域替換識別字，並將 `project.name` 與版本初始化為 `1.0.0`。
    - 腳本也會將遠端 `origin` 重新命名為 `upstream`，並依 `--origin` 參數幫你加回新的 `origin`；若想先檢查輸出，可省略 `--apply` 做乾跑。
    - 初始流程會建立 `template` 分支並安裝 pre-push hook；若不需要建立 `.venv`，可以加上 `--no-uv`。
    - 後續同步模板時，仍在 `template` 分支 `git pull upstream main`，再切回 `main` 做合併。
@@ -54,12 +54,12 @@
      ```
    - 使用 `uv` 執行 CLI 範例：
      ```bash
-     uv run python -m proj_name --name Alice
+     uv run python -m py_proj_template --name Alice
      ```
    - 或者直接啟用虛擬環境後以 Python 執行：
      ```bash
      source .venv/bin/activate  # Windows 使用 .venv\Scripts\activate
-     python -m proj_name --name Alice
+     python -m py_proj_template --name Alice
      ```
 
 3. **安裝與同步依賴**
@@ -120,4 +120,5 @@
 
 ## Note
 
-- 程式碼使用絕對匯入（例如 `from proj_name.api import ...`）。本地開發時請先執行 `uv pip install --editable .` 或設定 `PYTHONPATH=src` 後再啟動腳本，否則會出現 `ModuleNotFoundError`。若透過 `uv add git+...` 在其他專案中安裝此套件，`uv` 會自動處理匯入路徑，因此不需額外設定。
+- 程式碼使用絕對匯入（例如 `from py_proj_template.api import ...`）。本地開發時請先執行 `uv pip install --editable .` 或設定 `PYTHONPATH=src` 後再啟動腳本，否則會出現 `ModuleNotFoundError`。若透過 `uv add git+...` 在其他專案中安裝此套件，`uv` 會自動處理匯入路徑，因此不需額外設定。
+

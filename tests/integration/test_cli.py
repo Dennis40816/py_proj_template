@@ -6,13 +6,13 @@ from subprocess import CompletedProcess
 
 from typing import Callable
 
-from proj_name import get_greeting
+from py_proj_template import get_greeting
 
 
 def test_cli_demo(
     cli_runner: Callable[..., CompletedProcess[str]],
 ) -> None:
-    """Run `python -m proj_name` and capture its output."""
+    """Run `python -m py_proj_template` and capture its output."""
 
     completed = cli_runner("--name", "Integration")
 
@@ -20,3 +20,4 @@ def test_cli_demo(
     assert stdout[0] == "[core] Hello, Integration!"
     assert stdout[1] == "[application] [api] Hello, Integration!"
     assert get_greeting("Integration") in stdout[1]
+
