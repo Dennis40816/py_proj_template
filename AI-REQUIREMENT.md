@@ -47,7 +47,7 @@
 
 1. 確保工作目錄乾淨（無未提交變更）。
 2. 更新版本資訊：`pyproject.toml` 與 `config/settings.toml` 的版本必須一致。
-3. 撰寫 `CHANGELOG.md` 條目：所有新變更須新增至下一版本（例如新增 `[1.x.y] - Unreleased`），不得改動已寫入日期的歷史版本；必要補充請以新版本條目紀錄並視需要更新 `README.md`。
+3. 撰寫 `CHANGELOG.md` 條目：所有新變更須新增至下一版本（例如新增 `[1.x.y] - Unreleased`），不得改動已寫入日期的歷史版本(像`[1.0.4] - 2025-10-20` 是已經提交的，不可變更，應該在上面新增新版本才正確)；必要補充請以新版本條目紀錄並視需要更新 `README.md`。
 4. 執行 `uv run python scripts/run_checks.py`，所有檢查與測試需通過。
 5. 建立清楚的提交（例如 `chore: release X.Y.Z`）。
 6. 建立 `vX.Y.Z` 標籤後，執行 `python scripts/release_check.py --tag vX.Y.Z --require-highest` 驗證：模板專案 (`py-proj-template`) 會同時比對 `config/settings.toml`，其他專案則檢查 `pyproject.toml` 與 `src/<pkg>/__init__.py` 的版本。

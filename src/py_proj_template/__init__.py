@@ -10,7 +10,7 @@ from py_proj_template.api import get_greeting
 
 __all__ = ["get_greeting"]
 
-__version__ = '1.0.5'
+__version__ = "1.0.4"
 
 
 
