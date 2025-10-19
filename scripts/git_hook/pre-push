@@ -11,6 +11,10 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   # Only validate created or updated tags
   if [[ "$local_ref" =~ ^refs/tags/ ]] && [[ "$local_sha" != 0000000000000000000000000000000000000000 ]]; then
     tag="${local_ref#refs/tags/}"
+    # Skip helper tags like 'latest'; enforce checks only for release tags.
+    if [[ "$tag" != v* ]]; then
+      continue
+    fi
     python "$CHECK_SCRIPT" --tag "$tag" || status=1
   fi
 done
