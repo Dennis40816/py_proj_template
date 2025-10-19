@@ -135,17 +135,27 @@ def main(argv: list[str]) -> int:
 
     name, version = read_pyproject()
     if not name or not version:
-        print("[release] missing project.name/version in pyproject", file=sys.stderr)
+        print(
+            f"[release] missing [project].name/version in {PYPROJECT}",
+            file=sys.stderr,
+        )
         return 1
 
     if f"v{version}" != args.tag:
-        print(f"[release] version mismatch: tag={args.tag} vs pyproject=v{version}", file=sys.stderr)
+        print(
+            f"[release] tag mismatch: requested {args.tag} but {PYPROJECT} has version v{version}",
+            file=sys.stderr,
+        )
         return 1
 
     pkg_dir = normalized_pkg_dir(name)
     init_version = read_init_version(pkg_dir)
     if not init_version or init_version != version:
-        print(f"[release] __init__.__version__ mismatch: __init__={init_version} vs pyproject={version}", file=sys.stderr)
+        init_path = pkg_dir / "__init__.py"
+        print(
+            f"[release] __init__ mismatch in {init_path}: __version__={init_version} vs pyproject={version}",
+            file=sys.stderr,
+        )
         return 1
 
     if not changelog_has(version):

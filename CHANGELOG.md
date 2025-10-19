@@ -2,10 +2,11 @@
 
 ## [1.0.4] - Unreleased
 
-- Added `scripts/release_check.py` to unify release checks for pre-push and CI workflows managing the `latest` tag.
-- Replaced `.github/workflows/update-latest.yml` to call `release_check.py --update-latest` when new `v*` tags are pushed.
-- Renamed the template package to `py_proj_template` and updated tests, docs, and CLI imports accordingly.
-- Enhanced `scripts/repo_init.py` to keep README clone examples, and reset `CHANGELOG.md`/`TODO.md` to minimal templates during initialization.
+- 改善 `scripts/release_check.py` 的錯誤訊息，標示實際檔案路徑與欄位，方便定位問題。
+- 新增 `scripts/release_check.py` 作為統一釋出檢查，供 pre-push hook 與 CI 維護 `latest` 標籤。
+- 更新 `.github/workflows/update-latest.yml`，在推送 `v*` 標籤時執行 `release_check.py --update-latest`。
+- 將模板套件更名為 `py_proj_template`，並同步調整測試、文件與 CLI 匯入路徑。
+- `scripts/repo_init.py` 會保留 README 的 clone 範例，並於初始化時重設 `CHANGELOG.md`、`TODO.md` 為模板。
 
 ## [1.0.3] - 2025-10-19
 
