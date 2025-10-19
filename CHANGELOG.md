@@ -2,7 +2,7 @@
 
 ## [1.0.4] - 2025-10-20
 
-- 改善 `scripts/release_check.py` 的錯誤訊息，標示實際檔案路徑與欄位，方便定位問題。
+- 改善 `scripts/release_check.py` 的錯誤訊息並修正 GitHub Action 找不到 `v*` 標籤的問題。
 - 新增 `scripts/release_check.py` 作為統一釋出檢查，供 pre-push hook 與 CI 維護 `latest` 標籤。
 - 更新 `.github/workflows/update-latest.yml`，在推送 `v*` 標籤時執行 `release_check.py --update-latest`。
 - 將模板套件更名為 `py_proj_template`，並同步調整測試、文件與 CLI 匯入路徑。

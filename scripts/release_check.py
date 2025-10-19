@@ -96,7 +96,7 @@ def tag_exists(tag: str) -> bool:
 
 
 def highest_tag() -> str | None:
-    out = sh(["git", "tag", "--sort=-v:refname", "v*"], check=False).stdout.splitlines()
+    out = sh(["git", "tag", "--list", "--sort=-v:refname", "v*"], check=False).stdout.splitlines()
     return out[0] if out else None
 
 
