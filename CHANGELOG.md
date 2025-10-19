@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.5] - 2025-10-21
+- 測試 CI 對 1.0.5 的流程（自動更新 latest，稍後會還原）。
+
 ## [1.0.4] - 2025-10-20
 
 - 改善 `scripts/release_check.py` 的錯誤訊息並修正 GitHub Action 找不到 `v*` 標籤的問題。
@@ -36,5 +39,6 @@
 - 擴充 `tests/`，包含單元與整合測試示例以及常用 fixture（`conftest.py`）。
 - 撰寫 `README.md` 的 Intro、Quick Start、Usage、Notice、Note 等章節，指引用法、同步流程與測試清理事項。
 - 新增 `ai_requirements.md` 給 AI 開發助手，彙整自訂規則與核心開發準則。
+
 
 
