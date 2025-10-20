@@ -23,6 +23,7 @@ Notes:
 from __future__ import annotations
 
 import argparse, os, re, shutil, subprocess, sys
+from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,11 +31,22 @@ SRC = ROOT / "src"
 PKG_OLD = SRC / "py_proj_template"
 PYPROJECT = ROOT / "pyproject.toml"
 TEXT_EXT = {".py", ".toml", ".md", ".yml", ".yaml", ".txt", ".cfg", ".ini", ".json", ".lock"}
+EXCLUDES = {".git", ".venv", "build", "dist", "__pycache__", ".mypy_cache", ".pytest_cache", ".ruff_cache", ".idea"}
 PROTECTED = {str((ROOT / "config" / "settings.toml").resolve())}
 DOC_TEMPLATES = {
     "CHANGELOG.md": "# Changelog\n\n## [1.0.0] - Unreleased\n\n- TODO: list initial changes.\n",
     "TODO.md": "# TODO\n\n- [ ] Add top-priority tasks for {project_title}.\n",
 }
+
+
+@dataclass
+class Config:
+    root: Path
+    src: Path
+    new_name: str
+    origin: str
+    apply: bool
+    no_uv: bool
 
 
 def _update_project_table(text: str, *, name: str | None = None, version: str | None = None) -> str:
@@ -101,8 +113,36 @@ def git_clean() -> bool:
 
 def iter_text_files(root: Path):
     for p in root.rglob("*"):
-        if p.is_file() and p.suffix.lower() in TEXT_EXT:
-            yield p
+        if not p.is_file():
+            continue
+        if p.suffix.lower() not in TEXT_EXT:
+            continue
+        parts = set(p.parts)
+        if parts.intersection(EXCLUDES):
+            continue
+        yield p
+
+
+def rewrite_file(path: Path, transform, apply: bool) -> bool:
+    try:
+        before = path.read_text(encoding="utf-8")
+    except Exception:
+        return False
+    after = transform(before)
+    if after == before:
+        return False
+    if apply:
+        path.write_text(after, encoding="utf-8")
+    else:
+        print(f"dry-run: update {path}")
+    return True
+
+
+def replace_many(text: str, rules: list[tuple[re.Pattern[str], str]]) -> str:
+    out = text
+    for pat, repl in rules:
+        out = pat.sub(repl, out)
+    return out
 
 
 def rename_package(old_dir: Path, new_pkg: str, apply: bool) -> Path:
@@ -118,91 +158,40 @@ def rename_package(old_dir: Path, new_pkg: str, apply: bool) -> Path:
     return new_dir
 
 
+REPLACEMENTS: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"\bpy_proj_template\b"), "{new_name}"),
+    (re.compile(r"\bpy-proj-template\b"), "{new_name}"),
+]
+
+
 def replace_py_proj_template(root: Path, new_pkg: str, apply: bool) -> int:
-    pat = re.compile(r"\bpy_proj_template\b")
+    rules = [(pat, repl.format(new_name=new_pkg)) for pat, repl in REPLACEMENTS]
+
+    def transform_for_path(path: Path):
+        def _transform(s: str) -> str:
+            if path.name == "README.md":
+                # Avoid rewriting template clone URL hints; downstream users likely keep upstream path.
+                lines = s.splitlines(keepends=True)
+                new_lines: list[str] = []
+                for line in lines:
+                    if "git clone" in line and ("py_proj_template" in line or "py-proj-template" in line):
+                        new_lines.append(line)
+                        continue
+                    new_line = replace_many(line, rules)
+                    new_lines.append(new_line)
+                return "".join(new_lines)
+            return replace_many(s, rules)
+
+        return _transform
+
     n_changed = 0
     for p in iter_text_files(root):
         rp = str(p.resolve())
         if rp in PROTECTED:
             continue
-        try:
-            s = p.read_text(encoding="utf-8")
-        except Exception:
-            continue
-
-        changed_here = False
-        if p.name == "README.md":
-            # Avoid rewriting template clone URL hints; downstream users likely keep upstream path.
-            lines = s.splitlines(keepends=True)
-            new_lines = []
-            for line in lines:
-                if "git clone" in line and "py_proj_template" in line:
-                    new_lines.append(line)
-                    continue
-                new_line = pat.sub(new_pkg, line)
-                if new_line != line:
-                    changed_here = True
-                new_lines.append(new_line)
-            ns = "".join(new_lines)
-        else:
-            ns = pat.sub(new_pkg, s)
-            changed_here = ns != s
-
-        if ns != s:
+        if rewrite_file(p, transform_for_path(p), apply):
             n_changed += 1
-            if apply:
-                p.write_text(ns, encoding="utf-8")
-            elif changed_here:
-                print(f"dry-run: update {p}")
     return n_changed
-
-
-def update_pyproject(pyproj: Path, new_name: str, apply: bool):
-    s = pyproj.read_text(encoding="utf-8")
-    s2 = re.sub(r'(?m)^(project\.name\s*=\s*")[^"]+(")', rf'\1{new_name}\2', s)
-    s2 = s2.replace("py_proj_template", new_name)
-    if s2 != s:
-        if apply:
-            pyproj.write_text(s2, encoding="utf-8")
-        else:
-            print("dry-run: update pyproject.toml project.name and occurrences")
-
-
-# --- 新增：統一將版本設為 1.0.0 ---
-def set_versions(new_pkg: str, apply: bool):
-    # 1) pyproject.toml -> project.version = "1.0.0"
-    s = PYPROJECT.read_text(encoding="utf-8")
-    s2, n = re.subn(r'(?m)^(project\.version\s*=\s*")[^"]+(")', r'\g<1>1.0.0\2', s)
-    if n == 0:
-        # 若缺少 version 欄位則在 [project] 區段內追加
-        s2 = re.sub(r'(?m)^\[project\]\s*$', "[project]\nversion = \"1.0.0\"", s, count=1)
-        if s2 == s:
-            # 若沒找到 [project]，則附加到檔尾（fallback）
-            s2 = s.rstrip() + '\n[project]\nversion = "1.0.0"\n'
-    if s2 != s:
-        if apply:
-            PYPROJECT.write_text(s2, encoding="utf-8")
-        else:
-            print("dry-run: set pyproject.project.version = 1.0.0")
-
-    # 2) src/<pkg>/__init__.py -> __version__ = "1.0.0"
-    init_py = (SRC / new_pkg / "__init__.py")
-    if not init_py.exists():
-        if apply:
-            init_py.parent.mkdir(parents=True, exist_ok=True)
-            init_py.write_text('__version__ = "1.0.0"\n', encoding="utf-8")
-        else:
-            print(f"dry-run: create {init_py} with __version__ = 1.0.0")
-        return
-    t = init_py.read_text(encoding="utf-8")
-    t2, n2 = re.subn(r'(?m)^__version__\s*=\s*["\'][^"\']*["\']\s*$', '__version__ = "1.0.0"', t)
-    if n2 == 0:
-        t2 = t.rstrip() + '\n__version__ = "1.0.0"\n'
-    if t2 != t:
-        if apply:
-            init_py.write_text(t2, encoding="utf-8")
-        else:
-            print(f"dry-run: set {init_py} __version__ = 1.0.0")
 
 
 def safe_set_versions(new_pkg: str, apply: bool):
@@ -232,6 +221,19 @@ def safe_set_versions(new_pkg: str, apply: bool):
             init_py.write_text(t2, encoding="utf-8")
         else:
             print(f"dry-run: set {init_py} __version__ = 1.0.0")
+
+
+def update_pyproject_safe(pyproj: Path, new_name: str, apply: bool):
+    s = pyproj.read_text(encoding="utf-8")
+    s2 = _update_project_table(s, name=new_name)
+    # Also replace occurrences inside file for both variants
+    s2 = s2.replace("py_proj_template", new_name)
+    s2 = s2.replace("py-proj-template", new_name)
+    if s2 != s:
+        if apply:
+            pyproj.write_text(s2, encoding="utf-8")
+        else:
+            print("dry-run: update pyproject.toml [project].name and occurrences")
 
 def git_remote_exists(name: str) -> bool:
     try:
@@ -335,15 +337,18 @@ def main():
     mode = "APPLY" if args.apply else "DRY-RUN"
     print(f"{mode}: init new package = {args.new_name}")
 
+    # Prepare upstream baseline first to avoid overwriting our edits
+    set_git_remotes(args.origin, args.apply)
+    ensure_template_branch(args.apply)
+
+    # Then perform local renames and metadata updates
     rename_package(PKG_OLD, args.new_name, args.apply)
     n_files = replace_py_proj_template(ROOT, args.new_name, args.apply)
     print(f"files updated for identifier rename: {n_files}")
-    update_pyproject(PYPROJECT, args.new_name, args.apply)
+    update_pyproject_safe(PYPROJECT, args.new_name, args.apply)
     # set version to 1.0.0
     safe_set_versions(args.new_name, args.apply)
     reset_doc_templates(args.new_name, args.apply)
-    set_git_remotes(args.origin, args.apply)
-    ensure_template_branch(args.apply)
     create_env_and_install(args.apply, args.no_uv)
     install_pre_push_hook(args.apply)
     print("done.")
@@ -351,3 +356,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

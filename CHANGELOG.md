@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
+- refactor(repo_init):
+  - Safer [project] edits for pyproject.toml (single name/version).
+  - Centralized file rewrite + dry-run logging.
+  - Replace both identifiers: py_proj_template and py-proj-template.
+  - Preserve README git clone lines.
+  - Exclude .git/.venv/build/dist/caches during scan.
+  - Reorder: fetch/merge baseline before local edits.
+  - Prevent duplicate version key; behavior unchanged (init version 1.0.0).
+
+- docs: update CHANGELOG.
 ## [1.0.4] - 2025-10-20
 
 - 改善 `scripts/release_check.py` 的錯誤訊息並修正 GitHub Action 找不到 `v*` 標籤的問題。
@@ -36,6 +48,7 @@
 - 擴充 `tests/`，包含單元與整合測試示例以及常用 fixture（`conftest.py`）。
 - 撰寫 `README.md` 的 Intro、Quick Start、Usage、Notice、Note 等章節，指引用法、同步流程與測試清理事項。
 - 新增 `ai_requirements.md` 給 AI 開發助手，彙整自訂規則與核心開發準則。
+
 
 
 
