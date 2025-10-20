@@ -37,6 +37,52 @@ DOC_TEMPLATES = {
 }
 
 
+def _update_project_table(text: str, *, name: str | None = None, version: str | None = None) -> str:
+    lines = text.splitlines()
+    in_project = False
+    proj_start_idx = None
+    name_idx = None
+    version_idx = None
+
+    header_re = re.compile(r"^\s*\[[^\]]+\]\s*$")
+    name_re = re.compile(r"^\s*name\s*=\s*['\"].*['\"][^#]*$")
+    version_re = re.compile(r"^\s*version\s*=\s*['\"].*['\"][^#]*$")
+
+    for i, line in enumerate(lines):
+        if re.match(r"^\s*\[project\]\s*$", line):
+            in_project = True
+            proj_start_idx = i
+            continue
+        if in_project and i != proj_start_idx and header_re.match(line):
+            break
+        if in_project:
+            if name_idx is None and name_re.match(line):
+                name_idx = i
+            if version_idx is None and version_re.match(line):
+                version_idx = i
+
+    if proj_start_idx is None:
+        return text
+
+    def insert_after(idx: int, new_line: str):
+        nonlocal lines
+        lines = lines[: idx + 1] + [new_line] + lines[idx + 1 :]
+
+    if name is not None:
+        if name_idx is not None:
+            lines[name_idx] = f'name = "{name}"'
+        else:
+            insert_after(proj_start_idx, f'name = "{name}"')
+
+    if version is not None:
+        if version_idx is not None:
+            lines[version_idx] = f'version = "{version}"'
+        else:
+            target_idx = name_idx if name_idx is not None else proj_start_idx
+            insert_after(target_idx, f'version = "{version}"')
+
+    return "\n".join(lines) + ("\n" if text.endswith("\n") else "")
+
 def sh(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, cwd=ROOT, check=check, text=True)
 
@@ -159,6 +205,34 @@ def set_versions(new_pkg: str, apply: bool):
             print(f"dry-run: set {init_py} __version__ = 1.0.0")
 
 
+def safe_set_versions(new_pkg: str, apply: bool):
+    # Update [project].version safely (no duplicates)
+    s = PYPROJECT.read_text(encoding="utf-8")
+    s2 = _update_project_table(s, version="1.0.0")
+    if s2 != s:
+        if apply:
+            PYPROJECT.write_text(s2, encoding="utf-8")
+        else:
+            print("dry-run: set [project].version = 1.0.0")
+    # Keep __version__ behavior from set_versions
+    init_py = (SRC / new_pkg / "__init__.py")
+    if not init_py.exists():
+        if apply:
+            init_py.parent.mkdir(parents=True, exist_ok=True)
+            init_py.write_text('__version__ = "1.0.0"\n', encoding="utf-8")
+        else:
+            print(f"dry-run: create {init_py} with __version__ = 1.0.0")
+        return
+    t = init_py.read_text(encoding="utf-8")
+    t2, n2 = re.subn(r'(?m)^__version__\s*=\s*["\'][^"\']*["\']\s*$', '__version__ = "1.0.0"', t)
+    if n2 == 0:
+        t2 = t.rstrip() + '\n__version__ = "1.0.0"\n'
+    if t2 != t:
+        if apply:
+            init_py.write_text(t2, encoding="utf-8")
+        else:
+            print(f"dry-run: set {init_py} __version__ = 1.0.0")
+
 def git_remote_exists(name: str) -> bool:
     try:
         out = subprocess.check_output(["git", "remote"], text=True, cwd=ROOT)
@@ -266,7 +340,7 @@ def main():
     print(f"files updated for identifier rename: {n_files}")
     update_pyproject(PYPROJECT, args.new_name, args.apply)
     # set version to 1.0.0
-    set_versions(args.new_name, args.apply)
+    safe_set_versions(args.new_name, args.apply)
     reset_doc_templates(args.new_name, args.apply)
     set_git_remotes(args.origin, args.apply)
     ensure_template_branch(args.apply)
