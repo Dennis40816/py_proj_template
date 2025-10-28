@@ -256,6 +256,29 @@ def set_git_remotes(new_origin: str, apply: bool):
             print(f"dry-run: git remote add origin {new_origin}")
 
 
+def clear_template_tags(apply: bool):
+    """Remove local tags that look like template release tags (v*).
+
+    Intentionally local-only: do not touch any remote tags. This prevents
+    accidental reuse of template version tags in a new project.
+    """
+    try:
+        out = subprocess.check_output([
+            "git", "tag", "--list", "v*",
+        ], text=True, cwd=ROOT)
+    except Exception:
+        out = ""
+    tags = [t.strip() for t in out.splitlines() if t.strip()]
+    if not tags:
+        print("no local v* tags to clear")
+        return
+    for tag in tags:
+        if apply:
+            sh(["git", "tag", "-d", tag], check=False)
+        else:
+            print(f"dry-run: git tag -d {tag}")
+
+
 def ensure_template_branch(apply: bool):
     have_upstream_main = False
     try:
@@ -264,7 +287,8 @@ def ensure_template_branch(apply: bool):
     except Exception:
         have_upstream_main = False
     if apply:
-        sh(["git", "fetch", "--all"], check=False)
+        # Avoid re-fetching tags that were just cleared locally
+        sh(["git", "fetch", "--all", "--no-tags"], check=False)
         if have_upstream_main:
             sh(["git", "checkout", "-B", "template", "upstream/main"], check=False)
         else:
@@ -300,6 +324,25 @@ def install_pre_push_hook(apply: bool):
         os.chmod(dst, 0o755)
     else:
         print(f"dry-run: install hook {src} -> {dst}")
+
+
+def warn_if_hooks_overridden():
+    """Warn if core.hooksPath is set to a custom path so our hook may be ignored."""
+    try:
+        out = subprocess.check_output([
+            "git", "config", "--get", "core.hooksPath"
+        ], text=True, cwd=ROOT).strip()
+    except subprocess.CalledProcessError:
+        out = ""
+    except Exception:
+        out = ""
+    if out and out not in (".git/hooks", ".git\\hooks"):
+        print(
+            "warning: core.hooksPath is set to '",
+            out,
+            "' — installed .git/hooks/pre-push may be ignored.\n"
+            "         Consider adjusting core.hooksPath or installing the hook to that path.",
+        )
 
 
 def validate_new_name(name: str):
@@ -339,6 +382,7 @@ def main():
 
     # Prepare upstream baseline first to avoid overwriting our edits
     set_git_remotes(args.origin, args.apply)
+    clear_template_tags(args.apply)
     ensure_template_branch(args.apply)
 
     # Then perform local renames and metadata updates
@@ -351,6 +395,7 @@ def main():
     reset_doc_templates(args.new_name, args.apply)
     create_env_and_install(args.apply, args.no_uv)
     install_pre_push_hook(args.apply)
+    warn_if_hooks_overridden()
     print("done.")
 
 

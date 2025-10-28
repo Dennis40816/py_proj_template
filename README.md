@@ -7,7 +7,7 @@
 ```
 .
 ├── README.md                 # 專案說明與操作指引
-├── ai_requirements.md        # 規範文件（可放本專案的需求或規則）
+├── AI-REQUIREMENT.md        # 規範文件（可放本專案的需求或規則）
 ├── CHANGELOG.md              # 版本變更紀錄
 ├── CONTRIBUTING.md           # 貢獻指南
 ├── config/                   # 設定檔及 logging 相關範本
@@ -26,7 +26,6 @@
 │       ├── cli/              # CLI 參考實作，串接核心與應用層
 │       ├── core/             # 核心函式庫層（lib_example 展示可重用模組）
 │       ├── config/           # 給程式碼使用的設定套件入口
-│       ├── domain/           # 網域邏輯放置處
 │       ├── infra/            # 外部資源或基礎建設介面
 │       ├── services/         # 服務層或 use-case
 │       └── utils/            # 共用工具
@@ -64,9 +63,11 @@
 
 3. **安裝與同步依賴**
    - 將依賴寫入 `pyproject.toml` 後，執行：
-     ```bash
-     uv sync
-     ```
+    ```bash
+    uv sync
+    # 安裝含開發相依（dev extras）
+    uv sync --extra dev
+    ```
      `uv` 會根據 `pyproject.toml` 自動解析、安裝並鎖定所有套件。
    - 若要新增依賴，可使用 `uv add <package>`，之後再次 `uv sync` 讓環境保持一致。
 4. **清理或改寫範例測試**
@@ -102,6 +103,8 @@
 腳本會自動偵測 `uv` 是否存在，若有則改用 `uv run` 以確保在一致的環境中執行；否則退回到 `python -m <tool>` 的方式。
 
 ### Manage Tags
+
+> 初始化行為：由模板產生新專案時，`scripts/repo_init.py` 會清除本機 `v*` 標籤（不變更遠端），且後續 `git fetch` 採用 `--no-tags`，避免將模板標籤重新抓回。
 
 - 在建立 `vX.Y.Z` 標籤前，可透過以下指令再次確認檢查項目：
   ```bash

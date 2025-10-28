@@ -1,6 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.6] - Unreleased
+
+- (placeholder)
+
+## [1.0.5] - 2025-10-28
 
 - refactor(repo_init):
   - Safer [project] edits for pyproject.toml (single name/version).
@@ -12,6 +16,32 @@
   - Prevent duplicate version key; behavior unchanged (init version 1.0.0).
 
 - docs: update CHANGELOG.
+
+- feat(repo_init): clear local template tags
+  - Add clear_template_tags(apply) to delete local `v*` tags only (does not touch remotes).
+  - Call after set_git_remotes and before ensure_template_branch.
+  - Change ensure_template_branch to `git fetch --all --no-tags` to avoid re-fetching cleared tags.
+
+- feat(repo_init): warn on custom hooks path
+  - Add warn_if_hooks_overridden() and call after installing pre-push hook to alert when `core.hooksPath` overrides `.git/hooks`.
+
+- docs(AI-REQUIREMENT): branch/tag conventions
+  - Add branch rule `release/<major>.<minor>.x` and tag rule `v<semver>`.
+  - Recommend pushing tags with unambiguous ref: `git push origin refs/tags/vX.Y.Z`.
+  - Note repo_init clears local `v*` tags during initialization.
+
+- docs(README): template consistency and quick start
+  - Rename `ai_requirements.md` → `AI-REQUIREMENT.md` in tree listing.
+  - Remove non-existent `domain/` from tree listing.
+  - Add `uv sync --extra dev` to Quick Start.
+  - Add note under Manage Tags about local-only tag cleanup and `--no-tags` fetch.
+
+- ci(update-latest): enable manual trigger
+  - Add `workflow_dispatch` to `.github/workflows/update-latest.yml`.
+
+- test: make pytest runnable from repo root
+  - Ensure `src/` on `sys.path` and inject `PYTHONPATH` when running CLI in tests.
+  - Fix `project_root` to point to repo root.
 ## [1.0.4] - 2025-10-20
 
 - 改善 `scripts/release_check.py` 的錯誤訊息並修正 GitHub Action 找不到 `v*` 標籤的問題。

@@ -1,5 +1,12 @@
 # AI Coding Guidelines
 
+## Branch/Tag 命名規則
+
+- 分支：`release/<major>.<minor>.x`（例：`release/1.0.x`）。
+- 標籤：`v<semver>`（例：`v1.0.0`），避免與分支同名。
+- 推送標籤請使用不歧義語法：`git push origin refs/tags/vX.Y.Z`。
+- 初始化說明：由模板產生新專案時，`repo_init.py` 會清除本機遺留的 `v*` 標籤（不動遠端）。
+
 這份文件提供給 AI 開發助手閱讀，請嚴格遵守以下規範，確保所有專案維持一致品質與風格。
 
 ## 自訂開發規則
